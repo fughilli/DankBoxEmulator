@@ -1,0 +1,34 @@
+add RA RB RC        # RC = RA + RB
+addi RA RB IMM      # RB = RA + IMM
+addui RA RB IMM     # RB = RA + (unsigned)IMM
+luh RA IMM          # RA[31:16] = IMM
+
+load RA RB          # RA = MEM[RB]
+stor RA RB          # MEM[RB] = RA
+
+mul RA RB RC        # RC = RA * RB
+muli RA RB IMM      # RB = RA * IMM
+push RA             # mem[SP] = RA; SP -= 4
+pushi IMM           # mem[SP][15:0] = IMM; SP -= 4
+pop RA              # SP += 1; RA = mem[SP]
+jump RA             # LR = PC; PC = RA
+jumpi RA IMM        # LR = PC; PC = RA + IMM
+br RA               # LR = PC; PC += RA
+bi IMM              # LR = PC; PC += IMM
+call RA
+    --> push PC
+    --> push SP
+    --> push R0
+    --> push R1
+    --> push R2
+    --> push R3
+ret
+    --> pop R3
+    --> pop R2
+    --> pop R1
+    --> pop R0
+    --> pop SP
+    --> pop PC
+mov RA RB           # RB = RA
+halt                # processor stops execution
+dump                # meta-instruction: prints registers to console

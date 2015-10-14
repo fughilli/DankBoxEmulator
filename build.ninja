@@ -1,0 +1,16 @@
+cflags = -g
+
+rule cc
+    command = gcc $cflags -c $in -o $out
+
+rule cl
+    command = gcc $cflags $in -o $out
+
+rule rm
+    command = rm *.o emu
+
+build processor.o: cc processor.c
+build main.o: cc main.c
+build emu: cl processor.o main.o
+
+#build clean: rm
