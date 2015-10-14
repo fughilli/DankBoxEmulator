@@ -1,7 +1,7 @@
 add RA RB RC        # RC = RA + RB
 addi RA RB IMM      # RB = RA + IMM
 addui RA RB IMM     # RB = RA + (unsigned)IMM
-luh RA IMM          # RA[31:16] = IMM
+luh RA IMM          # RA[31:16] = IMM; RA[15:0] = 16'b0
 
 load RA RB          # RA = MEM[RB]
 stor RA RB          # MEM[RB] = RA
@@ -32,3 +32,16 @@ ret
 mov RA RB           # RB = RA
 halt                # processor stops execution
 dump                # meta-instruction: prints registers to console
+
+jz RA RB            # if(RA == 0) PC = RB
+jzi RA RB IMM       # if(RA == 0) PC = RB + IMM
+bz RA RB            # if(RA == 0) PC += RB
+bzi RA IMM          # if(RA == 0) PC += IMM
+
+jlt RA RB           # if(RA < 0) PC = RB
+jlti RA RB IMM      # if(RA < 0) PC = RB + IMM
+blt RA RB           # if(RA < 0) PC += RB
+blti RA IMM         # if(RA < 0) PC += IMM
+
+sz RA RB RC         # if(RA == 0) RC = RB
+slt RA RB RC        # if(RA < 0) RC = RB

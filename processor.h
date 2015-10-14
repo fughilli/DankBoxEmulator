@@ -29,7 +29,19 @@
 #define PROC_OPCODE_STOR (0x12)
 
 #define PROC_OPCODE_RET (0x13)
-#define PROC_OPCODE_
+
+#define PROC_OPCODE_JZ (0x14)
+#define PROC_OPCODE_JZI (0x15)
+#define PROC_OPCODE_BZ (0x16)
+#define PROC_OPCODE_BZI (0x17)
+
+#define PROC_OPCODE_JLT (0x18)
+#define PROC_OPCODE_JLTI (0x19)
+#define PROC_OPCODE_BLT (0x1A)
+#define PROC_OPCODE_BLTI (0x1B)
+
+#define PROC_OPCODE_SZ (0x1C)
+#define PROC_OPCODE_SLT (0x1D)
 
 extern register_map_t proc_regs;
 extern byte_t* real_memory;

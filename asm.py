@@ -1,27 +1,5 @@
 #!/usr/bin/python
 
-##PROC_OPCODE_ADD = (0x00)
-##PROC_OPCODE_ADDI = (0x01)
-##PROC_OPCODE_ADDUI = (0x02)
-##PROC_OPCODE_LUH = (0x03)
-##PROC_OPCODE_MUL = (0x04)
-##PROC_OPCODE_MULI = (0x05)
-##PROC_OPCODE_PUSH = (0x06)
-##PROC_OPCODE_PUSHI = (0x07)
-##PROC_OPCODE_POP = (0x08)
-##PROC_OPCODE_JUMP = (0x09)
-##PROC_OPCODE_JUMPI = (0x0A)
-##PROC_OPCODE_BR = (0x0B)
-##PROC_OPCODE_BI = (0x0C)
-##PROC_OPCODE_CALL = (0x0D)
-##
-##PROC_OPCODE_MOV = (0x0E)
-##PROC_OPCODE_HALT = (0x0F)
-##PROC_OPCODE_DUMP = (0x10)
-##
-##PROC_OPCODE_LOAD = (0x11)
-##PROC_OPCODE_STOR = (0x12)
-
 import sys
 
 ## OPCODE, RA?, RB?, RC?, IMM
@@ -48,7 +26,18 @@ instr_dict = {
 "HALT"  : (0x0F, (0, 0, 0, 0)),
 "DUMP"  : (0x10, (0, 0, 0, 0)),
 "LOAD"  : (0x11, (1, 1, 0, 0)),
-"STOR"  : (0x12, (1, 1, 0, 0))
+"STOR"  : (0x12, (1, 1, 0, 0)),
+"RET"   : (0x13, (0, 0, 0, 0)),
+"JZ"    : (0x14, (1, 1, 0, 0)),
+"JZI"   : (0x15, (1, 1, 0, 1)),
+"BZ"    : (0x16, (1, 1, 0, 0)),
+"BZI"   : (0x17, (1, 0, 0, 1)),
+"JLT"   : (0x18, (1, 1, 0, 0)),
+"JLTI"  : (0x19, (1, 1, 0, 1)),
+"BLT"   : (0x1A, (1, 1, 0, 0)),
+"BLTI"  : (0x1B, (1, 0, 0, 1)),
+"SZ"    : (0x1C, (1, 1, 1, 0)),
+"SLT"   : (0x1D, (1, 1, 1, 0)),
 }
 
 ##
