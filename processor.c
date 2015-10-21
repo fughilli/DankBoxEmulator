@@ -18,7 +18,7 @@ void proc_init()
      * Initialize the registers to 0.
      */
     memset(&proc_regs, 0, sizeof(proc_regs));
-    
+
     /*
      * Allocate memory for the processor. This includes the RAM and the ROM.
      */
@@ -42,7 +42,7 @@ void proc_init()
 void proc_load_program(const char* fname)
 {
     FILE* fp = fopen(fname, "r");
-    
+
     int readval;
 
     int i = 0;
