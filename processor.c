@@ -123,6 +123,15 @@ bool proc_instr_execute(word_t instr)
 
     switch(opcode)
     {
+        /*
+         * ADD instruction.
+         *
+         * RA + RB --> RC
+         *
+         * Sets overflow, zero, and negative flags as appropriate.
+         *
+         * TODO: Check that the flags are set correctly.
+         */
         case PROC_OPCODE_ADD:
             proc_reg(rc) = proc_reg(ra) + proc_reg(rb);
 
@@ -146,6 +155,15 @@ bool proc_instr_execute(word_t instr)
 
             break;
 
+        /*
+         * ADDI instruction (signed immediate add).
+         *
+         * RA + SignExtend(imm) --> RB
+         *
+         * Sets overflow, zero, and negative flags as appropriate.
+         *
+         * TODO: Check that the flags are set correctly.
+         */
         case PROC_OPCODE_ADDI:
             proc_reg(rb) = proc_reg(ra) + proc_sign_extend_imm(imm);
 
@@ -171,6 +189,15 @@ bool proc_instr_execute(word_t instr)
 
             break;
 
+        /*
+         * ADDUI instruction (unsigned immediate add).
+         *
+         * RA + imm --> RB
+         *
+         * Sets overflow, zero, and negative flags as appropriate.
+         *
+         * TODO: Check that the flags are set correctly.
+         */
         case PROC_OPCODE_ADDUI:
             proc_reg(rb) = proc_reg(ra) + imm;
 
@@ -195,39 +222,78 @@ bool proc_instr_execute(word_t instr)
 
             break;
 
+        /*
+         * HALT instruction.
+         *
+         * Stops the processor (terminates the emulator).
+         */
         case PROC_OPCODE_HALT:
             return false;
 
+        /*
+         * DUMP meta-instruction.
+         *
+         * Dumps the contents of the registers (to stdout).
+         */
         case PROC_OPCODE_DUMP:
             proc_dump_regs();
             break;
 
+        /*
+         * LUH instruction (load upper halfword).
+         *
+         * {imm[31:16], 16'b0} --> RA
+         */
         case PROC_OPCODE_LUH:
             proc_reg(ra) = imm << 16;
             break;
 
+        /*
+         * JUMP instruction.
+         *
+         * RA --> PC
+         */
         case PROC_OPCODE_JUMP:
             proc_regs.PC = proc_reg(ra);
 
             increment_pc = false;
             break;
 
+        /*
+         * JUMPI instruction (jump immediate).
+         *
+         * RA + SignExtend(imm) --> PC
+         */
         case PROC_OPCODE_JUMPI:
             proc_regs.PC = proc_reg(ra) + proc_sign_extend_imm(imm);
 
             increment_pc = false;
             break;
 
+        /*
+         * BR instruction (branch).
+         *
+         * PC + RA --> PC
+         */
         case PROC_OPCODE_BR:
             proc_regs.PC = proc_regs.PC + proc_reg(ra);
 
-
+        /*
+         * BI instruction (branch immediate).
+         *
+         * PC + SignExtend(imm) --> PC
+         */
         case PROC_OPCODE_BI:
             proc_regs.PC = proc_regs.PC + proc_sign_extend_imm(imm);
 
             increment_pc = false;
             break;
 
+        /*
+         * MOV instruction (move).
+         *
+         * RA --> RB
+         */
         case PROC_OPCODE_MOV:
             proc_reg(rb) = proc_reg(ra);
 
@@ -235,6 +301,11 @@ bool proc_instr_execute(word_t instr)
                 increment_pc = false;
             break;
 
+        /*
+         * LOAD instruction.
+         *
+         * MEM[RB] --> RA
+         */
         case PROC_OPCODE_LOAD:
             proc_reg(ra) = get_mem_word(proc_reg(rb));
 
