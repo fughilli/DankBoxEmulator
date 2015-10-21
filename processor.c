@@ -313,13 +313,172 @@ bool proc_instr_execute(word_t instr)
                 increment_pc = false;
             break;
 
+        /*
+         * STOR instruction.
+         *
+         * RA --> MEM[RB]
+         */
         case PROC_OPCODE_STOR:
             get_mem_word(proc_reg(rb)) = proc_reg(ra);
             break;
 
+        /*
+         * JZ instruction (jump zero).
+         *
+         * if(RA == 0): RB --> PC
+         */
+        case PROC_OPCODE_JZ:
+            if(proc_reg(ra) == 0)
+            {
+                proc_regs.PC = proc_reg(rb);
+                increment_pc = false;
+            }
+            break;
+
+        /*
+         * JZI instruction (jump zero immediate).
+         *
+         * if(RA == 0): RB + SignExtend(imm) --> PC
+         */
+        case PROC_OPCODE_JZI:
+            if(proc_reg(ra) == 0)
+            {
+                proc_regs.PC = proc_reg(rb) + proc_sign_extend_imm(imm);
+                increment_pc = false;
+            }
+            break;
+
+        /*
+         * BZ instruction (branch zero).
+         *
+         * if(RA == 0): PC + RB --> PC
+         */
+        case PROC_OPCODE_BZ:
+            if(proc_reg(ra) == 0)
+            {
+                proc_regs.PC += proc_reg(rb);
+                increment_pc = false;
+            }
+            break;
+
+        /*
+         * BZI instruction (branch zero immediate).
+         *
+         * if(RA == 0): PC + SignExtend(imm) --> PC
+         */
+        case PROC_OPCODE_BZI:
+            if(proc_reg(ra) == 0)
+            {
+                proc_regs.PC += proc_sign_extend_imm(imm);
+                increment_pc = false;
+            }
+            break;
+
+        /*
+         * JLT instruction (jump zero).
+         *
+         * if(RA < 0): RB --> PC
+         */
+        case PROC_OPCODE_JLT:
+            if(proc_reg(ra) < 0)
+            {
+                proc_regs.PC = proc_reg(rb);
+                increment_pc = false;
+            }
+            break;
+
+        /*
+         * JLTI instruction (jump zero immediate).
+         *
+         * if(RA < 0): RB + SignExtend(imm) --> PC
+         */
+        case PROC_OPCODE_JLTI:
+            if(proc_reg(ra) < 0)
+            {
+                proc_regs.PC = proc_reg(rb) + proc_sign_extend_imm(imm);
+                increment_pc = false;
+            }
+            break;
+
+        /*
+         * BLT instruction (branch zero).
+         *
+         * if(RA < 0): PC + RB --> PC
+         */
+        case PROC_OPCODE_BLT:
+            if(proc_reg(ra) < 0)
+            {
+                proc_regs.PC += proc_reg(rb);
+                increment_pc = false;
+            }
+            break;
+
+        /*
+         * BLTI instruction (branch zero immediate).
+         *
+         * if(RA < 0): PC + SignExtend(imm) --> PC
+         */
+        case PROC_OPCODE_BLTI:
+            if(proc_reg(ra) < 0)
+            {
+                proc_regs.PC += proc_sign_extend_imm(imm);
+                increment_pc = false;
+            }
+            break;
+
+        /*
+         * MOVZ instruction (move zero).
+         *
+         * if(RA == 0): RB --> RC
+         */
+        case PROC_OPCODE_MOVZ:
+            if(proc_reg(ra) == 0)
+            {
+                proc_reg(rc) = proc_reg(rb);
+
+                if(rc == 12)
+                    increment_pc = false;
+            }
+            break;
+
+        /*
+         * MOVLT instruction (move less than).
+         *
+         * if(RA == 0): RB --> RC
+         */
+        case PROC_OPCODE_MOVLT:
+            if(proc_reg(ra) < 0)
+            {
+                proc_reg(rc) = proc_reg(rb);
+
+                if(rc == 12)
+                    increment_pc = false;
+            }
+            break;
+
+        /*
+         * PUSH instruction (push to stack).
+         *
+         * RA --> MEM[SP]; SP -= 4
+         */
+        case PROC_OPCODE_PUSH:
+            get_mem_word(proc_regs.SP) = proc_reg(ra);
+            proc_regs.SP -= 4;
+            break;
+
+        /*
+         * POP instruction (pop from stack).
+         *
+         * SP += 4; MEM[SP] --> RA
+         */
+        case PROC_OPCODE_POP:
+            proc_regs.SP += 4;
+            proc_reg(ra) = get_mem_word(proc_regs.SP);
+            break;
+
         default:
-            proc_regs.SR |= SR_FAULT_DECODE_FLAG; 
-    } 
+            proc_regs.SR |= SR_FAULT_DECODE_FLAG;
+    }
 
     if(increment_pc)
         proc_regs.PC += 4;
