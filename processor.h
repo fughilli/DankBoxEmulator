@@ -55,7 +55,7 @@ extern byte_t* real_memory;
          (__addr__) < (ARCH_ROM_OFFSET + ARCH_ROM_SIZE))
 
 #define get_addr_in_real_mem(__addr__) \
-        (get_addr_in_ram(__addr__) && get_addr_in_rom(__addr__))
+        (get_addr_in_ram(__addr__) || get_addr_in_rom(__addr__))
 
 /**
  * @brief Computes the real address within real_memory for the given emulated
