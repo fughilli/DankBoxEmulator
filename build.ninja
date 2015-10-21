@@ -11,6 +11,8 @@ rule rm
 
 build processor.o: cc processor.c
 build main.o: cc main.c
-build emu: cl processor.o main.o
+build devices.o: cc devices.c
+build device_uart.o: cc device_uart.c
+build emu: cl processor.o devices.o device_uart.o main.o
 
 #build clean: rm
