@@ -203,8 +203,7 @@ bool proc_instr_execute(word_t instr)
             break;
 
         case PROC_OPCODE_LUH:
-            proc_reg(ra) &= ~0x0000FFFF;
-            proc_reg(ra) |= imm << 16;
+            proc_reg(ra) = imm << 16;
             break;
 
         case PROC_OPCODE_JUMP:
