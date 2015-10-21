@@ -3,6 +3,8 @@
 
 #include "architecture.h"
 
+#include <stdint.h>
+
 /*
  * Opcode definitions.
  */
@@ -69,19 +71,19 @@ extern byte_t* real_memory;
          0)
 
 #define get_mem_word(__addr__) \
-        (get_addr_in_real_mem(__addr__) ? \
-        (*((word_t*)(real_memory + get_real_addr(__addr__)))) : \
-        (get_device_word(__addr__))
+      (*(get_addr_in_real_mem(__addr__) ? \
+      ((word_t*)(intptr_t)(real_memory + get_real_addr(__addr__))) : \
+      ((word_t*)(intptr_t)device_get_word(__addr__))))
 
 #define get_mem_hword(__addr__) \
-        (get_addr_in_real_mem(__addr__) ? \
-        (*((hword_t*)(real_memory + get_real_addr(__addr__)))) : \
-        (get_device_hword(__addr__))
+      (*(get_addr_in_real_mem(__addr__) ? \
+      ((hword_t*)(intptr_t)(real_memory + get_real_addr(__addr__))) : \
+      ((hword_t*)(intptr_t)device_get_hword(__addr__))))
 
 #define get_mem_byte(__addr__) \
-        (get_addr_in_real_mem(__addr__) ? \
-        (*((byte_t*)(real_memory + get_real_addr(__addr__)))) : \
-        (get_device_byte(__addr__))
+        (*(get_addr_in_real_mem(__addr__) ? \
+        ((byte_t*)(intptr_t)(real_memory + get_real_addr(__addr__))) : \
+        ((byte_t*)(intptr_t)device_get_byte(__addr__))))
 
 #define proc_reg(__regidx__) \
         (*(((word_t*)(&proc_regs) + (__regidx__))))
