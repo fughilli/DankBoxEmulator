@@ -147,25 +147,25 @@ bool proc_instr_execute(word_t instr)
             break;
 
         case PROC_OPCODE_ADDI:
-            proc_reg(rc) = proc_reg(ra) + proc_sign_extend_imm(imm);
+            proc_reg(rb) = proc_reg(ra) + proc_sign_extend_imm(imm);
 
             /*
              * Check for overflow.
              */
-            if((proc_reg(ra) | proc_sign_extend_imm(imm)) & ~proc_reg(rc) & 
+            if((proc_reg(ra) | proc_sign_extend_imm(imm)) & ~proc_reg(rb) &
                0x80000000)
                 new_sr |= SR_ALU_O_FLAG;
 
             /*
              * Check for negative.
              */
-            if(proc_reg(rc) & 0x80000000)
+            if(proc_reg(rb) & 0x80000000)
                 new_sr |= SR_ALU_N_FLAG;
 
             /*
              * Check for zero.
              */
-            if(proc_reg(rc) == 0)
+            if(proc_reg(rb) == 0)
                 new_sr |= SR_ALU_Z_FLAG;
 
 
