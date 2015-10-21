@@ -33,7 +33,7 @@ void proc_init()
     /*
      * Set the SP to the top of RAM.
      */
-    proc_regs.SP = ARCH_RAM_OFFSET + ARCH_RAM_SIZE;
+    proc_regs.SP = ARCH_RAM_OFFSET + ARCH_RAM_SIZE - sizeof(word_t);
 }
 
 /**
