@@ -40,8 +40,8 @@
 #define PROC_OPCODE_BLT (0x1A)
 #define PROC_OPCODE_BLTI (0x1B)
 
-#define PROC_OPCODE_SZ (0x1C)
-#define PROC_OPCODE_SLT (0x1D)
+#define PROC_OPCODE_MOVZ (0x1C)
+#define PROC_OPCODE_MOVLT (0x1D)
 
 extern register_map_t proc_regs;
 extern byte_t* real_memory;
