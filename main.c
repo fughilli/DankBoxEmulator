@@ -18,9 +18,9 @@ int main(int argc, char** argv)
     /*
      * If the user does not provide a binary to run, print the usage and exit.
      */
-    if(argc != 2)
+    if(argc < 2)
     {
-        printf("USAGE:\n\t%s:\t[BINFILE]\n", argv[0]);
+        printf("USAGE:\n\t%s:\t[-v]\t[BINFILE]\n", argv[0]);
         return 1;
     }
 
@@ -28,6 +28,23 @@ int main(int argc, char** argv)
      * Initialize the global flags.
      */
     global_verbosity = 0;
+
+    /*
+     * We don't care about the program invocation name at this point.
+     */
+    argc--;
+    argv++;
+
+    while(argc > 1)
+    {
+        if(strcmp(argv[0], "-v") == 0)
+        {
+            global_verbosity = 1;
+        }
+
+        argc--;
+        argv++;
+    }
 
     /*
      * Initialize the processor.
@@ -40,9 +57,10 @@ int main(int argc, char** argv)
     uart_init();
 
     /*
-     * Load the program binary from the provided binary file.
+     * Load the program binary from the provided binary file. The filename
+     * should be the last argument after parsing the flags.
      */
-    proc_load_program(argv[1]);
+    proc_load_program(argv[0]);
 
     /*
      * Execute the program in a loop.
