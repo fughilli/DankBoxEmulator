@@ -1,8 +1,10 @@
+#include "global_config.h"
 #include "processor.h"
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
+
 #include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 register_map_t proc_regs;
 byte_t* real_memory;
@@ -47,7 +49,8 @@ void proc_load_program(const char* fname)
 
     while((readval = fgetc(fp)) != EOF)
     {
-        printf("Read byte from file: %02x\n", readval);
+        if(global_verbosity)
+            printf("Read byte from file: %02x\n", readval);
         //get_mem_byte((ARCH_ROM_OFFSET + i++)) = (byte_t)readval;
         real_memory[i++] = (byte_t)readval;
     }
@@ -106,9 +109,10 @@ bool proc_instr_execute(word_t instr)
 
     proc_instr_decode(instr, &ra, &rb, &rc, &imm, &opcode);
 
-    printf("@0x%08x: Decoded 0x%08x"
-           " --> (RA: %d, RB: %d, RC: %d, IMM: %d, OPC: 0x%02x)\n",
-           proc_regs.PC, instr, ra, rb, rc, imm, opcode);
+    if(global_verbosity)
+        printf("@0x%08x: Decoded 0x%08x"
+               " --> (RA: %d, RB: %d, RC: %d, IMM: %d, OPC: 0x%02x)\n",
+               proc_regs.PC, instr, ra, rb, rc, imm, opcode);
 
     /*
      * This will be used to store any new SR flags generated during this cycle.
