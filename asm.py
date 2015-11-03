@@ -448,8 +448,7 @@ if __name__ == '__main__':
                 if current_region:
                     regions.append(current_region)
 
-                closure_addr = int(addr)
-                region_labels[label] = lambda x=closure_addr : x
+                region_labels[label] = lambda x=addr : x
 
                 current_region = Region([], label, _resolve_label)
             # If there was no address, this label is relatively placed
@@ -465,10 +464,8 @@ if __name__ == '__main__':
                 ##     current_data_len
 
                 region_labels[label] = \
-                    lambda : lambda_debug(closure_region.offset(), \
-                                          "%s offset: " % \
-                                              closure_region.label) + \
-                             lambda_debug(current_data_len, "length: ")
+                        lambda reg=closure_region,length=current_data_len : \
+                        reg.offset() + length
 
         ## Parse a line beginning with $w: as a raw word value.
         ##                             $h: as a raw halfword value.
@@ -504,8 +501,10 @@ if __name__ == '__main__':
 
             # PC lookup for this instruction is based on the region offset +
             #   the current region length
-            instr_datum.pc_lookup = lambda : current_region.offset() + \
-                                             current_region_length
+            instr_datum.pc_lookup = lambda reg=current_region, \
+                                           length=current_region_length: \
+                                           reg.offset() + \
+                                           length
 
             # Pass the toplevel label lookup function
             instr_datum.label_lookup = _resolve_label
