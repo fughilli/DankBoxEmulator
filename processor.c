@@ -474,6 +474,9 @@ bool proc_instr_execute(word_t instr)
         case PROC_OPCODE_POP:
             proc_regs.SP += 4;
             proc_reg(ra) = get_mem_word(proc_regs.SP);
+
+            if(ra == 12)
+                increment_pc = false;
             break;
 
         default:
