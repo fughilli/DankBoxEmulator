@@ -45,6 +45,31 @@
 #define PROC_OPCODE_MOVZ (0x1C)
 #define PROC_OPCODE_MOVLT (0x1D)
 
+#define PROC_OPCODE_AND (0x1E)
+#define PROC_OPCODE_ANDI (0x1F)
+#define PROC_OPCODE_OR (0x20)
+#define PROC_OPCODE_ORI (0x21)
+#define PROC_OPCODE_INV (0x22)
+#define PROC_OPCODE_XOR (0x23)
+#define PROC_OPCODE_XORI (0x24)
+#define PROC_OPCODE_LOADH (0x25)
+#define PROC_OPCODE_LOADB (0x26)
+#define PROC_OPCODE_STORH (0x27)
+#define PROC_OPCODE_STORB (0x28)
+
+#define PROC_OPCODE_SAR (0x29)
+#define PROC_OPCODE_SLL (0x3A)
+#define PROC_OPCODE_SLR (0x3B)
+#define PROC_OPCODE_SARI (0x3C)
+#define PROC_OPCODE_SLRI (0x3D)
+#define PROC_OPCODE_DIV (0x3E)
+#define PROC_OPCODE_DIVI (0x3F)
+#define PROC_OPCODE_DIVUI (0x40)
+#define PROC_OPCODE_MOVW (0x41)
+
+#define PROC_OPCODE_BALI (0x42)
+#define PROC_OPCODE_JAL (0x43)
+
 extern register_map_t proc_regs;
 extern byte_t* real_memory;
 
@@ -71,14 +96,14 @@ extern byte_t* real_memory;
          0)
 
 #define get_mem_word(__addr__) \
-      (*(get_addr_in_real_mem(__addr__) ? \
-      ((word_t*)(intptr_t)(real_memory + get_real_addr(__addr__))) : \
-      ((word_t*)(intptr_t)device_get_word(__addr__))))
+        (*(get_addr_in_real_mem(__addr__) ? \
+        ((word_t*)(intptr_t)(real_memory + get_real_addr(__addr__))) : \
+        ((word_t*)(intptr_t)device_get_word(__addr__))))
 
 #define get_mem_hword(__addr__) \
-      (*(get_addr_in_real_mem(__addr__) ? \
-      ((hword_t*)(intptr_t)(real_memory + get_real_addr(__addr__))) : \
-      ((hword_t*)(intptr_t)device_get_hword(__addr__))))
+        (*(get_addr_in_real_mem(__addr__) ? \
+        ((hword_t*)(intptr_t)(real_memory + get_real_addr(__addr__))) : \
+        ((hword_t*)(intptr_t)device_get_hword(__addr__))))
 
 #define get_mem_byte(__addr__) \
         (*(get_addr_in_real_mem(__addr__) ? \
@@ -94,5 +119,11 @@ extern byte_t* real_memory;
 #define proc_sign_extend_imm(__imm__) \
         ((word_t)(((__imm__) & 0x00008000ul) ? \
                   (0xFFFF0000ul | (__imm__)) : (__imm__)))
+
+#define proc_high_ones_mask(__num__) \
+        (~proc_low_ones_mask(32 - (__num__)))
+
+#define proc_low_ones_mask(__num__) \
+        (0xFFFFFFFF >> (32 - (__num__)))
 
 #endif

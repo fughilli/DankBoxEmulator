@@ -479,6 +479,196 @@ bool proc_instr_execute(word_t instr)
                 increment_pc = false;
             break;
 
+        /*
+         * AND instruction (bitwise).
+         *
+         * RC = RA & RB
+         */
+        case PROC_OPCODE_AND:
+            proc_reg(rc) = proc_reg(ra) & proc_reg(rb);
+
+            if(rc == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * ANDI instruction (bitwise).
+         *
+         * RC = RA & {16'b0,imm}
+         */
+        case PROC_OPCODE_ANDI:
+            proc_reg(rc) = proc_reg(ra) & ((word_t)imm);
+
+            if(rc == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * OR instruction (bitwise).
+         *
+         * RC = RA | RB
+         */
+        case PROC_OPCODE_OR:
+            proc_reg(rc) = proc_reg(ra) | proc_reg(rb);
+
+            if(rc == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * ORI instruction (bitwise).
+         *
+         * RC = RA | {16'b0,imm}
+         */
+        case PROC_OPCODE_ORI:
+            proc_reg(rc) = proc_reg(ra) | ((word_t)imm);
+
+            if(rc == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * INV instruction (bitwise).
+         *
+         * RB = ~RA
+         */
+        case PROC_OPCODE_INV:
+            proc_reg(rb) = ~proc_reg(ra);
+
+            if(rb == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * XOR instruction (bitwise).
+         *
+         * RC = RA ^ RB
+         */
+        case PROC_OPCODE_XOR:
+            proc_reg(rc) = proc_reg(ra) ^ proc_reg(rb);
+
+            if(rc == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * XORI instruction (bitwise).
+         *
+         * RB = RA ^ IMM
+         */
+        case PROC_OPCODE_XORI:
+            proc_reg(rb) = proc_reg(ra) ^ ((word_t)imm);
+
+            if(rb == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * LOADH instruction (load halfword).
+         *
+         * RA = MEM[RB]
+         */
+        case PROC_OPCODE_LOADH:
+            proc_reg(ra) = ((word_t)get_mem_hword(proc_reg(rb)));
+
+            if(ra == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * STORH instruction (store halfword).
+         *
+         * MEM[RB] = RA
+         */
+        case PROC_OPCODE_STORH:
+            get_mem_hword(proc_reg(rb)) = ((hword_t)(proc_reg(ra) & 0xFFFF));
+            break;
+
+        /*
+         * LOADB instruction (load byte).
+         *
+         * RA = {24'b0, MEM[RB]}
+         */
+        case PROC_OPCODE_LOADB:
+            proc_reg(ra) = ((word_t)get_mem_byte(proc_reg(rb)));
+
+            if(ra == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * STORB instruction (store byte).
+         *
+         * MEM[RB] = RA[7:0]
+         */
+        case PROC_OPCODE_STORB:
+            get_mem_byte(proc_reg(ra)) = ((byte_t)(proc_reg(rb) & 0xFF));
+            break;
+
+        /*
+         * SAR instruction (shift arithmetic right).
+         *
+         * RC = sign_extend(RA >> RB)
+         */
+        case PROC_OPCODE_SAR:
+            proc_reg(rc) = proc_reg(ra) >> proc_reg(rb);
+            if(proc_reg(ra) & 0x80000000)
+                proc_reg(rc) |= proc_high_ones_mask(proc_reg(rb));
+
+            if(rc == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * SLL instruction (shift logical left).
+         *
+         * RC = RA << RB
+         */
+        case PROC_OPCODE_SLL:
+            proc_reg(rc) = proc_reg(ra) << proc_reg(rb);
+
+            if(rc == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * SLR instruction (shift logical right).
+         *
+         * RC = RA >> RB
+         */
+        case PROC_OPCODE_SLR:
+            proc_reg(rc) = proc_reg(ra) >> proc_reg(rb);
+
+            if(rc == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * SARI instruction (shift arithmetic right immediate).
+         *
+         * RC = sign_extend(RA >> sign_extend(IMM))
+         */
+        case PROC_OPCODE_SARI:
+            proc_reg(rc) = proc_reg(ra) >> proc_sign_extend_imm(imm);
+
+            if((proc_sign_extend_imm(imm) > 0) & (proc_reg(ra) & 0x80000000))
+                proc_reg(rc) |= proc_high_ones_mask(proc_reg(rb));
+
+            if(rc == 12)
+                increment_pc = false;
+            break;
+
+        /*
+         * BALI instruction (branch and link immediate).
+         *
+         * LR = PC + 4; PC += sign_extend(IMM)
+         */
+        case PROC_OPCODE_BALI:
+            proc_regs.LR = proc_regs.PC + 4;
+            proc_regs.PC += proc_sign_extend_imm(imm);
+            increment_pc = false;
+            break;
+
         default:
             if(global_verbosity)
                 printf("Unknown instruction @PC=0x%08x: {opc: 0x%02x, ra: 0x%x\

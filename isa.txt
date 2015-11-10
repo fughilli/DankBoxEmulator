@@ -45,3 +45,43 @@ blti RA IMM         # if(RA < 0) PC += IMM
 
 sz RA RB RC         # if(RA == 0) RC = RB
 slt RA RB RC        # if(RA < 0) RC = RB
+
+# Shifts
+sar RA RB RC        # RC = sign_extend(RA >> RB)
+sll RA RB RC        # RC = RA << RB
+slr RA RB RC        # RC = RA >> RB
+
+sari RA RB IMM      # RB = sign_extend(RA >> IMM)
+slri RA RB IMM      # RB = RA >> IMM
+
+# Arithmetic division
+div RA RB RC        # RC = RA / RB
+divi RA RB IMM      # RB = RA / IMM
+divui RA RB IMM     # RB = RA / (unsigned)IMM
+
+# Branch-and-link instructions
+bali IMM            # PC += IMM; LR = PC + 8
+
+# Bitwise operations
+and RA RB RC
+andi RA RB IMM
+
+or RA RB RC
+ori RA RB IMM
+
+inv RA RB
+
+xor RA RB RC
+xori RA RB IMM
+
+# Non-word access
+loadh RA RB
+loadb RA RB
+
+storh RA RB
+storb RA RB
+
+# Pseudo-instructions
+movw RA IMM32       # Tranlates to:
+                    #   LUH RA IMM32[31:16]
+                    #   ADDUI RA IMM32[15:0]

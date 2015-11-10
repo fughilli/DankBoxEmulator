@@ -19,6 +19,7 @@ FLASH_LENGTH = 256 * 1024
 ##
 ##  Flags for specifying the kinds of immediates that instructions accept.
 ##
+IMMFLAG_WORD = 8
 IMMFLAG_LABEL = 4
 IMMFLAG_UNSIGNED = 2
 IMMFLAG_SIGNED = 1
@@ -59,6 +60,28 @@ instr_dict = {
 "BLTI"  : (0x1B, (1, 0, 0, 5), 4),
 "SZ"    : (0x1C, (1, 1, 1, 0), 4),
 "SLT"   : (0x1D, (1, 1, 1, 0), 4),
+"AND"   : (0x1E, (1, 1, 1, 0), 4),
+"ANDI"  : (0x1F, (1, 1, 0, 2), 4),
+"OR"    : (0x20, (1, 1, 1, 0), 4),
+"ORI"   : (0x21, (1, 1, 0, 2), 4),
+"INV"   : (0x22, (1, 1, 0, 0), 4),
+"XOR"   : (0x23, (1, 1, 1, 0), 4),
+"XORI"  : (0x24, (1, 1, 0, 2), 4),
+"LOADH" : (0x25, (1, 1, 0, 0), 4),
+"LOADB" : (0x26, (1, 1, 0, 0), 4),
+"STORH" : (0x27, (1, 1, 0, 0), 4),
+"STORB" : (0x28, (1, 1, 0, 0), 4),
+"SAR"   : (0x29, (1, 1, 1, 0), 4),
+"SLL"   : (0x3A, (1, 1, 1, 0), 4),
+"SLR"   : (0x3B, (1, 1, 1, 0), 4),
+"SARI"  : (0x3C, (1, 1, 0, 1), 4),
+"SLRI"  : (0x3D, (1, 1, 0, 1), 4),
+"DIV"   : (0x3E, (1, 1, 1, 0), 4),
+"DIVI"  : (0x3F, (1, 1, 0, 1), 4),
+"DIVUI" : (0x40, (1, 1, 0, 1), 4),
+"MOVW"  : (0x41, (1, 0, 0, 8), 8),
+"BALI"  : (0x42, (0, 0, 0, 5), 4),
+"JAL"   : (0x43, (1, 0, 0, 0), 4),
 }
 
 ##
@@ -226,6 +249,11 @@ def preparse_instr(line):
                 return immfield
             except Exception:
                 pass
+        if immflags & IMMFLAG_WORD:
+            try:
+                return immfield
+            except Exception:
+                pass
         raise Exception("Immediate \"%s\" could not be parsed." % immfield)
 
     ##    instr_val = instr_val | (
@@ -263,7 +291,12 @@ class Region(object):
         return self.label_lookup(self.label)
 
     def length(self):
-        return sum(map(lambda x : x.width(), self.data))
+        retlen = sum(map(lambda x : x.width(), self.data))
+
+        if(retlen % WORD_WIDTH):
+            return retlen + (WORD_WIDTH - (retlen % WORD_WIDTH))
+
+        return retlen
 
     def intersects(self, rother):
         if ((self.offset() <= rother.offset()) and
@@ -290,6 +323,11 @@ class Region(object):
         for datum in self.data:
             ## print "\tDatum: ", datum
             ret.extend(datum.value())
+
+        retlen = len(ret)
+
+        if(retlen % WORD_WIDTH):
+            ret.extend([0] * (WORD_WIDTH - (retlen % WORD_WIDTH)))
 
         return ret
 
@@ -330,7 +368,7 @@ class InstructionDatum(Datum):
         self.label_lookup = label_lookup
         self.pc_lookup = pc_lookup
 
-    def value(self):
+    def __value_generic__(self):
         if type(self.imm) == str:
             self.imm = self.label_lookup(self.imm) - self.pc_lookup()
 
@@ -346,8 +384,39 @@ class InstructionDatum(Datum):
 
         return get_bytes(instr, 4)
 
+    def __value_movw__(self):
+        try:
+            self.imm = parse_num(self.imm)
+        except Exception:
+            self.imm = self.label_lookup(self.imm)
+
+        instr = [0, 0]
+        instr[0] = (instr_dict["LUH"][0] & 0xFF)
+        instr[0] <<= 4
+        instr[0] |= (self.raidx & 0xF)
+        instr[0] <<= 20
+        instr[0] |= ((self.imm >> 16) & 0xFFFF)
+
+        instr[1] = (instr_dict["ADDUI"][0] & 0xFF)
+        instr[1] <<= 4
+        instr[1] |= (self.raidx & 0xF)
+        instr[1] <<= 4
+        instr[1] |= (self.raidx & 0xF)
+        instr[1] <<= 16
+        instr[1] |= (self.imm & 0xFFFF)
+
+        return (get_bytes(instr[0], 4) + get_bytes(instr[1], 4))
+
+
+    def value(self):
+        pseudo_opcode_map = { instr_dict["MOVW"][0] : self.__value_movw__ }
+        if not self.opcode in pseudo_opcode_map.keys():
+            return self.__value_generic__()
+        else:
+            return pseudo_opcode_map[self.opcode]()
+
     def width(self):
-        return 4
+        return self.__width__
 
 ##
 ##  Places a region into memory.
@@ -372,10 +441,16 @@ def place_memory(region, memory, prog_zero_address):
 
     # Copy the bytes from the region into memory.
     # TODO: do this with a slice assignment.
+
+    # First check that the region is aligned on a word boundary.
+    if(region.offset() % 4):
+        raise Exception("Region %s is not aligned on a word boundary." %
+                        region.label)
+
+    # Expand the region's data into a byte array.
     expandedData = region.expandData()
 
-    ## print "Region ", region.label, " expanded data: ", expandedData
-
+    # Copy the bytes.
     for i,byte in enumerate(expandedData):
         memory[(region.offset() - prog_zero_address) + i] = byte
 
@@ -448,6 +523,8 @@ if __name__ == '__main__':
                 if current_region:
                     regions.append(current_region)
 
+                ## print "Region ", label, " at address ", hex(addr)
+
                 region_labels[label] = lambda x=addr : x
 
                 current_region = Region([], label, _resolve_label)
@@ -461,11 +538,16 @@ if __name__ == '__main__':
 
                 ## print "Region ", label, " in base region ", \
                 ##     current_region.label, " with current length ", \
-                ##     current_data_len
+                ##     current_data_len, " (addr ", hex(current_data_len + \
+                ##     current_region.offset()), ")"
 
                 region_labels[label] = \
                         lambda reg=closure_region,length=current_data_len : \
                         reg.offset() + length
+                    ##lambda : lambda_debug(closure_region.offset(), \
+                    ##                      "%s offset: " % \
+                    ##                          closure_region.label) + \
+                    ##         lambda_debug(current_data_len, "length: ")
 
         ## Parse a line beginning with $w: as a raw word value.
         ##                             $h: as a raw halfword value.
