@@ -1,4 +1,4 @@
-_print@0x1000100:
+_putc@0x1000100:
 # Caller context save
 PUSH R7
 PUSH R8
@@ -20,37 +20,29 @@ POP R7
 # Jump unconditionally to link register
 JUMP LR
 
-_printn@0x1000200:
+_puts@0x1000200:
 # Caller context save
 PUSH LR
 PUSH R0
 PUSH R1
-PUSH R2
-PUSH R3
 
-# Compute the address for _print into R3
-LUH R3 0x0100
-ADDUI R3 R3 0x0100
+# Move the address to R1
+MOV R0 R1
 
-# Move the counter to R2
-MOV R0 R2
+_puts_loop_head:
+# Load a byte from the address given in R1 to R0
+LOADB R0 R1
 
-# Load a word from the address given in R1 to R0
-LOAD R0 R1
+BZI R0 _puts_done
 
-MOV PC LR
-ADDUI LR LR 12
-JUMP R3
+BALI _putc
 
-# Increment R1 and decrement R2
-ADDUI R1 R1 4
-ADDI R2 R2 -1
+# Increment address
+ADDUI R1 R1 1
 
-BZI R2 8
-BI -28
+BI _puts_loop_head
 
-POP R3
-POP R2
+_puts_done:
 POP R1
 POP R0
 POP LR
@@ -58,71 +50,73 @@ POP LR
 JUMP LR
 
 _data@0x1000500:
-$:0x0000002a
-$:0x00000062
-$:0x00000075
-$:0x00000062
-$:0x00000062
-$:0x0000006c
-$:0x00000069
-$:0x0000006e
-$:0x00000067
-$:0x00000020
-$:0x0000006e
-$:0x0000006f
-$:0x00000069
-$:0x00000073
-$:0x00000065
-$:0x00000073
-$:0x0000002a
-$:0x00000020
-$:0x00000048
-$:0x00000065
-$:0x0000006c
-$:0x0000006c
-$:0x0000006f
-$:0x00000020
-$:0x00000077
-$:0x0000006f
-$:0x00000072
-$:0x0000002d
-$:0x0000002d
-$:0x0000002a
-$:0x00000063
-$:0x0000006f
-$:0x00000075
-$:0x00000067
-$:0x00000068
-$:0x0000002a
-$:0x00000020
-$:0x0000002a
-$:0x00000063
-$:0x0000006f
-$:0x00000075
-$:0x00000067
-$:0x00000068
-$:0x0000002a
-$:0x0000000a
+#$b:0x2a
+#$b:0x62
+#$b:0x75
+#$b:0x62
+#$b:0x62
+#$b:0x6c
+#$b:0x69
+#$b:0x6e
+#$b:0x67
+#$b:0x20
+#$b:0x6e
+#$b:0x6f
+#$b:0x69
+#$b:0x73
+#$b:0x65
+#$b:0x73
+#$b:0x2a
+#$b:0x20
+#$b:0x48
+#$b:0x65
+#$b:0x6c
+#$b:0x6c
+#$b:0x6f
+#$b:0x20
+#$b:0x77
+#$b:0x6f
+#$b:0x72
+#$b:0x2d
+#$b:0x2d
+#$b:0x2a
+#$b:0x63
+#$b:0x6f
+#$b:0x75
+#$b:0x67
+#$b:0x68
+#$b:0x2a
+#$b:0x20
+#$b:0x2a
+#$b:0x63
+#$b:0x6f
+#$b:0x75
+#$b:0x67
+#$b:0x68
+#$b:0x2a
+#$b:0x0a
+
+$b:0x48
+$b:0x65
+$b:0x6c
+$b:0x6c
+$b:0x6f
+$b:0x20
+$b:0x77
+$b:0x6f
+$b:0x72
+$b:0x6c
+$b:0x64
+$b:0x21
+$b:0x0a
+$b:0x00
 
 _main@0x1000000:
-# Compute jump address for _printn
-LUH R2 0x0100
-ADDUI R2 R2 0x0200
-
 # Compute the address of the _data section
-LUH R1 0x0100
-ADDUI R1 R1 0x0500
+MOVW R0 _data
 
-# Save print counter to R0
-LUH R0 0
-ADDUI R0 R0 45
-
-# Save PC+12 to LR (skip over next two instructions on return)
-MOV PC LR
-ADDUI LR LR 12
-
-# Jump to _print
-JUMP R2
+# Branch and link to _puts
+BALI _puts
 
 # Halt
 HALT
