@@ -480,6 +480,10 @@ bool proc_instr_execute(word_t instr)
             break;
 
         default:
+            if(global_verbosity)
+                printf("Unknown instruction @PC=0x%08x: {opc: 0x%02x, ra: 0x%x\
+, rb: 0x%x, rc: 0x%x, imm: 0x%04x}\n", proc_regs.PC, opcode, proc_reg(ra),
+                       proc_reg(rb), proc_reg(rc), imm);
             proc_regs.SR |= SR_FAULT_DECODE_FLAG;
     }
 
